@@ -31,11 +31,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.home),
         onPressed: () {},
         mini: true,
-        tooltip: 'Testing on long press',
-        notchMargin: 20.0,
+        tooltip: 'Testing on long press'
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
+        shape: DiamondFab.notchedShape,
+        notchMargin: 8,
         child: Container(
           height: 60.0,
         ),

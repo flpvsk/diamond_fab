@@ -25,6 +25,15 @@ class _DefaultHeroTag {
   String toString() => '<default FloatingActionButton tag>';
 }
 
+Path getDiamondPath(Rect rect) {
+  return Path()
+    ..moveTo(rect.left + rect.width / 2.0, rect.top)
+    ..lineTo(rect.right, rect.top + rect.height / 2.0)
+    ..lineTo(rect.left + rect.width / 2.0, rect.bottom)
+    ..lineTo(rect.left, rect.top + rect.height / 2.0)
+    ..close();
+}
+
 /// A material design diamond shaped floating action button.
 ///
 /// Unlike the basic floating action button, this button is diamond shaped by default.
@@ -46,6 +55,8 @@ class _DefaultHeroTag {
 /// * [FloatingActionButton]
 /// * [FloatingActionButtonLocation]
 class DiamondFab extends StatefulWidget {
+  static final NotchedShape notchedShape = const _DiamondNotchedShape();
+
   /// The widget that is below this widget on the tree.
   ///
   /// Ussually an [Icon]
@@ -204,8 +215,6 @@ class DiamondFabState extends State<DiamondFab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _notchChange =
-        Scaffold.setFloatingActionButtonNotchFor(context, _computeNotch);
   }
 
   @override
@@ -215,28 +224,30 @@ class DiamondFabState extends State<DiamondFab> {
     }
     super.deactivate();
   }
+}
 
-  // Draws the Notch.
-  Path _computeNotch(Rect main, Rect fab, Offset start, Offset end) {
-    final Rect marginFab = fab.inflate(widget.notchMargin);
-    if (!main.overlaps(marginFab)) return Path()..lineTo(end.dx, end.dy);
+class _DiamondNotchedShape implements NotchedShape {
+  const _DiamondNotchedShape();
 
-    final Rect intersection = marginFab.intersect(main);
-    final double notchCenter = intersection.height *
-        (marginFab.height / 2.0) /
-        (marginFab.width / 2.0);
+  @override
+  Path getOuterPath(Rect host, Rect guest) {
+    var diamondPath = getDiamondPath(guest);
+    var hostPath = Path()
+        ..moveTo(host.left, host.top)
+        ..lineTo(host.right, host.top)
+        ..lineTo(host.right, host.bottom)
+        ..lineTo(host.left, host.bottom)
+        ..close();
 
-    return Path()
-      ..lineTo(marginFab.center.dx - notchCenter, main.top)
-      ..lineTo(marginFab.left + marginFab.width / 2.0, marginFab.bottom)
-      ..lineTo(marginFab.center.dx + notchCenter, main.top)
-      ..lineTo(end.dx, end.dy);
+    return Path.combine(PathOperation.difference, hostPath, diamondPath);
   }
 }
 
 /// [_DiamondBorder] for the [DiamondFab], this is what draws the shape.
 
 class _DiamondBorder extends ShapeBorder {
+  const _DiamondBorder();
+
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.only();
 
@@ -247,12 +258,7 @@ class _DiamondBorder extends ShapeBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection textDirection}) {
-    return Path()
-      ..moveTo(rect.left + rect.width / 2.0, rect.top)
-      ..lineTo(rect.right, rect.top + rect.height / 2.0)
-      ..lineTo(rect.left + rect.width / 2.0, rect.bottom)
-      ..lineTo(rect.left, rect.top + rect.height / 2.0)
-      ..close();
+    return getDiamondPath(rect);
   }
 
   @override
